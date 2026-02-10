@@ -12,6 +12,6 @@ export const databaseConfig: TypeOrmModuleOptions = {
   type: 'sqlite',
   database: process.env.DB_DATABASE || 'data/dev.sqlite',
   entities: [User],
-  synchronize: process.env.DB_SYNCHRONIZE === 'true' || process.env.NODE_ENV === 'development',
+  synchronize: process.env.NODE_ENV !== 'production',
   logging: process.env.NODE_ENV === 'development',
 };
