@@ -10,23 +10,30 @@ Production-ready full-stack monorepo with Node.js + TypeScript, featuring:
 - **Shared**: TypeScript package for shared types/DTOs
 - **Quality**: ≥80% test coverage, ESLint, Prettier, full type safety
 
+**NEW**: API de gestion de notes de frais (Expense Management API)
+- Backend NestJS avec TypeORM + SQLite
+- Swagger documentation complète
+- Tests unitaires ≥85% coverage
+- Authentification factice (V1) → JWT (V2)
+- Stockage local fichiers (V1) → Cloud (V2)
+
 ## Key Features
 
-### Core Infrastructure
+### Core Infrastructure (Existing)
 - NPM workspaces monorepo structure
 - Shared TypeScript package for DTOs/types
 - Environment configuration management
 - CORS configuration for development
 - Comprehensive error handling
 
-### Frontend Features
+### Frontend Features (Existing)
 - Status dashboard showing system health
 - Real-time backend/database connectivity check
 - Clean Tailwind UI
 - Vite proxy for API calls
 - Vitest + Testing Library for tests
 
-### Backend Features
+### Backend Features (Existing)
 - Health check endpoint with real DB testing
 - User management (CRUD operations)
 - Swagger documentation at `/docs`
@@ -34,9 +41,36 @@ Production-ready full-stack monorepo with Node.js + TypeScript, featuring:
 - TypeORM with SQLite
 - Structured logging with NestJS Logger
 
+### NEW: Expense Management API (V1)
+
+#### Entities & Relations
+1. **User**: firstName, lastName, email (unique), role (EMPLOYEE), managerId (V2)
+2. **ExpenseReport**: purpose, reportDate, totalAmount (calculated), status, paymentDate, userId
+3. **Expense**: reportId, category, expenseName, description, amount, expenseDate, status
+4. **Attachment**: expenseId, fileName, filePath, mimeType, size
+
+#### Business Rules
+- totalAmount calculé automatiquement (somme des expenses)
+- Recalcul à chaque create/update/delete d'expense
+- Modification autorisée si status ∈ {CREATED, SUBMITTED}
+- Workflow: CREATED → SUBMITTED → VALIDATED/REJECTED → PAID
+- Upload fichiers: 5MB max, types autorisés (jpeg, png, pdf)
+- Stockage local: `uploads/<expenseId>/<uuid>.<ext>`
+
+#### API Endpoints (25+)
+- **Users**: GET, POST, PATCH, DELETE /api/users
+- **ExpenseReports**: CRUD + /submit, /validate, /reject, /pay
+- **Expenses**: CRUD avec recalcul automatique totalAmount
+- **Attachments**: Upload, download, delete, list
+
+#### Authentication
+- V1: FakeAuthGuard (return true)
+- V2: JWT + rôles (EMPLOYEE, MANAGER)
+
 ### Quality Standards
 - ESLint + Prettier across all packages
-- ≥80% test coverage (frontend + backend)
+- ≥85% test coverage (Expense API)
+- ≥80% test coverage (existing features)
 - TypeScript strict mode
 - Validation on all inputs
 - Proper error handling and HTTP exceptions
@@ -61,11 +95,16 @@ Production-ready full-stack monorepo with Node.js + TypeScript, featuring:
 │   ├── src/
 │   │   ├── config/    # Configuration modules
 │   │   ├── database/  # TypeORM setup
+│   │   ├── common/    # Shared (enums, guards, interceptors, filters)
 │   │   ├── health/    # Health check module
 │   │   ├── users/     # User CRUD module
+│   │   ├── expense-reports/  # ExpenseReports module
+│   │   ├── expenses/         # Expenses module
+│   │   ├── attachments/      # Attachments module
 │   │   ├── app.module.ts
 │   │   └── main.ts
 │   ├── data/          # SQLite database files
+│   ├── uploads/       # File uploads (gitignored)
 │   └── package.json
 │
 ├── shared/            # Shared TypeScript types
@@ -74,7 +113,16 @@ Production-ready full-stack monorepo with Node.js + TypeScript, featuring:
 │   │   └── index.ts
 │   └── package.json
 │
+├── memory-bank/       # Project context & decisions
+│   ├── productContext.md
+│   ├── activeContext.md
+│   ├── progress.md
+│   ├── decisionLog.md
+│   └── systemPatterns.md
+│
 ├── package.json       # Root workspace config
+├── ARCHITECTURE_PLAN.md  # Original architecture
+├── ARCHITECTURE_GESTION_NOTES_FRAIS.md  # Expense API architecture
 └── README.md
 ```
 
@@ -114,7 +162,9 @@ Production-ready full-stack monorepo with Node.js + TypeScript, featuring:
 - Backend runs on port 3000
 - Vite proxy: `/api/*` → `http://localhost:3000/*`
 - Frontend calls: `fetch('/api/health')`
+- Swagger docs: `http://localhost:3000/docs`
 
 ---
 
 2026-02-10 16:28:40 - Initial project context created for full-stack monorepo
+2026-02-11 09:02:00 - Added Expense Management API architecture and features
