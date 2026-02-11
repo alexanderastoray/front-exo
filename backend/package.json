@@ -10,6 +10,7 @@
     "build": "nest build",
     "start": "node dist/main",
     "start:prod": "node dist/main",
+    "seed": "ts-node src/database/seeds/run-seed.ts",
     "test": "jest",
     "test:cov": "jest --coverage",
     "test:watch": "jest --watch",

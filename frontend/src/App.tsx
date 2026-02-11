@@ -1,11 +1,14 @@
-import StatusPage from './pages/StatusPage';
+/**
+ * App Component
+ * Main application component with routing
+ */
+
+import { ExpenseReportsPage } from './pages/ExpenseReportsPage';
 
 function App() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <StatusPage />
-    </div>
-  );
+  // For now, just show the ExpenseReportsPage
+  // TODO: Add routing with React Router
+  return <ExpenseReportsPage />;
 }
 
 export default App;

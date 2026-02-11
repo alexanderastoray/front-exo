@@ -3,6 +3,8 @@
  * Provides error handling and common fetch configuration
  */
 
+import axios from 'axios';
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -14,7 +16,34 @@ export class ApiError extends Error {
 }
 
 /**
- * Generic API call function with error handling
+ * Axios instance with base configuration
+ */
+export const apiClient = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      throw new ApiError(
+        error.response.data?.message || `HTTP ${error.response.status}`,
+        error.response.status
+      );
+    }
+    throw new ApiError(
+      error.message || 'Network error occurred',
+      undefined
+    );
+  }
+);
+
+/**
+ * Generic API call function with error handling (legacy support)
  */
 export async function apiCall<T>(url: string, options?: RequestInit): Promise<T> {
   try {
