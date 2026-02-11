@@ -56,14 +56,14 @@ describe('ExpenseReportsController', () => {
     it('should create an expense report', async () => {
       const createDto: CreateExpenseReportDto = {
         purpose: 'Business trip to Paris',
-        reportDate: new Date('2026-02-01'),
+        reportDate: '2026-02-01',
         userId: 'user-123',
       };
 
       const expectedResult = new ExpenseReportResponseDto({
         id: 'report-123',
         purpose: createDto.purpose,
-        reportDate: createDto.reportDate,
+        reportDate: new Date(createDto.reportDate),
         userId: createDto.userId,
         status: ReportStatus.CREATED,
         totalAmount: 0,

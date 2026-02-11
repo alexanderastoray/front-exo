@@ -70,7 +70,7 @@ describe('ExpensesService', () => {
         expenseName: 'Train ticket',
         description: 'Paris to Lyon',
         amount: 50.0,
-        expenseDate: new Date('2026-02-01'),
+        expenseDate: '2026-02-01',
       };
 
       const report = {
@@ -119,7 +119,7 @@ describe('ExpensesService', () => {
         expenseName: 'Train ticket',
         description: 'Paris to Lyon',
         amount: 50.0,
-        expenseDate: new Date('2026-02-01'),
+        expenseDate: '2026-02-01',
       };
 
       const report = {

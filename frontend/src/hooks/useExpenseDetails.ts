@@ -20,7 +20,7 @@ export function useExpenseDetails(expenseId: string) {
         const data = await expensesApi.getById(expenseId);
         setExpense(data);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to fetch expense details'));
+        setError(new Error('Failed to fetch expense details'));
         console.error('Error fetching expense details:', err);
       } finally {
         setLoading(false);
@@ -29,6 +29,8 @@ export function useExpenseDetails(expenseId: string) {
 
     if (expenseId) {
       fetchExpenseDetails();
+    } else {
+      setLoading(false);
     }
   }, [expenseId]);
 

@@ -1,0 +1,13 @@
+# E2E Test artifacts
+screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# Test results
+coverage/
+test-results/
+*.log
+
+# Build output
+dist/

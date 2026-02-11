@@ -45,7 +45,7 @@ describe('ExpensesController', () => {
         expenseName: 'Train ticket',
         description: 'Paris to Lyon',
         amount: 50.0,
-        expenseDate: new Date('2026-02-01'),
+        expenseDate: '2026-02-01',
       };
 
       const expectedResult = new ExpenseResponseDto({
@@ -55,7 +55,7 @@ describe('ExpensesController', () => {
         expenseName: createDto.expenseName,
         description: createDto.description,
         amount: createDto.amount,
-        expenseDate: createDto.expenseDate,
+        expenseDate: new Date(createDto.expenseDate),
         status: ExpenseStatus.CREATED,
         createdAt: new Date(),
         updatedAt: new Date(),

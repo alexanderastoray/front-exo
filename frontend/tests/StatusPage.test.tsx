@@ -72,10 +72,12 @@ describe('StatusPage', () => {
     render(<StatusPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Database connection failed')).toBeInTheDocument();
+      expect(screen.getByText('SQLITE_CANTOPEN: unable to open database file')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('SQLITE_CANTOPEN: unable to open database file')).toBeInTheDocument();
+    // Check that both status cards show the error
+    const errorMessages = screen.getAllByText('Database connection failed');
+    expect(errorMessages).toHaveLength(2); // Overall Status and Database sections
   });
 
   it('refetches data when refresh button is clicked', async () => {

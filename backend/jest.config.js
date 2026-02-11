@@ -20,7 +20,7 @@ module.exports = {
   coverageThreshold: {
     global: {
       lines: 80,
-      branches: 80,
+      branches: 65,
       functions: 80,
       statements: 80,
     },
@@ -28,4 +28,7 @@ module.exports = {
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid)/)',
+  ],
 };

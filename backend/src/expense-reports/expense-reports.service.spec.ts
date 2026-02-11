@@ -56,7 +56,7 @@ describe('ExpenseReportsService', () => {
     it('should create a new expense report', async () => {
       const createDto: CreateExpenseReportDto = {
         purpose: 'Business trip to Paris',
-        reportDate: new Date('2026-02-01'),
+        reportDate: '2026-02-01',
         userId: 'user-123',
       };
 

@@ -137,6 +137,116 @@ describe('UsersService', () => {
 
       await expect(service.update('non-existent', {})).rejects.toThrow(NotFoundException);
     });
+
+    it('should update email when new email is provided and does not exist', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updateUserDto: UpdateUserDto = {
+        email: 'newemail@example.com',
+      };
+
+      repository.findOne
+        .mockResolvedValueOnce(user) // First call to find the user
+        .mockResolvedValueOnce(null); // Second call to check if new email exists
+      repository.save.mockResolvedValue({ ...user, email: 'newemail@example.com' });
+
+      const result = await service.update('uuid-1', updateUserDto);
+
+      expect(result.email).toBe('newemail@example.com');
+      expect(repository.findOne).toHaveBeenCalledTimes(2);
+      expect(repository.findOne).toHaveBeenNthCalledWith(1, { where: { id: 'uuid-1' } });
+      expect(repository.findOne).toHaveBeenNthCalledWith(2, { where: { email: 'newemail@example.com' } });
+    });
+
+    it('should throw ConflictException when updating to an existing email', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const existingUser = {
+        id: 'uuid-2',
+        email: 'existing@example.com',
+      };
+
+      const updateUserDto: UpdateUserDto = {
+        email: 'existing@example.com',
+      };
+
+      repository.findOne
+        .mockResolvedValueOnce(user) // First call to find the user
+        .mockResolvedValueOnce(existingUser); // Second call finds existing email
+
+      await expect(service.update('uuid-1', updateUserDto)).rejects.toThrow(ConflictException);
+      expect(repository.save).not.toHaveBeenCalled();
+    });
+
+    it('should not check for email conflict when email is not being updated', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updateUserDto: UpdateUserDto = {
+        firstName: 'Jane',
+        lastName: 'Smith',
+      };
+
+      repository.findOne.mockResolvedValueOnce(user);
+      repository.save.mockResolvedValue({ ...user, ...updateUserDto });
+
+      await service.update('uuid-1', updateUserDto);
+
+      expect(repository.findOne).toHaveBeenCalledTimes(1);
+      expect(repository.save).toHaveBeenCalled();
+    });
+
+    it('should not check for email conflict when email is same as current', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updateUserDto: UpdateUserDto = {
+        email: 'john@example.com', // Same email
+        firstName: 'Jane',
+      };
+
+      repository.findOne.mockResolvedValueOnce(user);
+      repository.save.mockResolvedValue({ ...user, ...updateUserDto });
+
+      await service.update('uuid-1', updateUserDto);
+
+      expect(repository.findOne).toHaveBeenCalledTimes(1);
+      expect(repository.save).toHaveBeenCalled();
+    });
   });
 
   describe('remove', () => {

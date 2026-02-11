@@ -19,12 +19,12 @@ export interface FilterState {
 export type FilterKey = keyof FilterState;
 
 export const DEFAULT_FILTERS: FilterState = {
-  status: [ReportStatus.SUBMITTED],
+  status: [],
   dateFrom: null,
   dateTo: null,
   amountMin: 0,
   amountMax: 1000,
   categories: [],
-  sortBy: 'amount',
+  sortBy: 'date',
   sortOrder: 'desc',
 };

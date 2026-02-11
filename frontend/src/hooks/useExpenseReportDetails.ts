@@ -37,6 +37,8 @@ export function useExpenseReportDetails(reportId: string) {
 
     if (reportId) {
       fetchReportDetails();
+    } else {
+      setLoading(false);
     }
   }, [reportId]);
 
