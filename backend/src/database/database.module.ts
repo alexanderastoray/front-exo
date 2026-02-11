@@ -7,7 +7,7 @@ import { databaseConfig } from '../config/database.config';
  * Configures TypeORM with SQLite
  */
 @Module({
-  imports: [TypeOrmModule.forRoot(databaseConfig)],
+  imports: [TypeOrmModule.forRoot(databaseConfig())],
   exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

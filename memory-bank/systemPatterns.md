@@ -1,34 +1,84 @@
 # System Patterns
 
-This file documents recurring patterns and standards used in the project.
+## Tests NestJS
 
-## Coding Patterns
+### Mock Repository Pattern
+```typescript
+const mockRepository = {
+  create: jest.fn(),
+  save: jest.fn(),
+  findOne: jest.fn(),
+  find: jest.fn(),
+  remove: jest.fn(),
+  createQueryBuilder: jest.fn(),
+};
 
-[2026-02-10 16:31:35] - **TypeScript Strict Mode**: All packages use strict TypeScript configuration
-[2026-02-10 16:31:35] - **Barrel Exports**: Shared package uses index.ts for clean imports
-[2026-02-10 16:31:35] - **DTO Pattern**: All API contracts defined as DTOs with validation
-[2026-02-10 16:31:35] - **Error Handling**: Try-catch in async functions, error boundaries in React
-[2026-02-10 16:31:35] - **Environment Variables**: .env.example files document required config
+// Dans beforeEach
+{
+  provide: getRepositoryToken(Entity),
+  useValue: mockRepository,
+}
+```
 
-## Architectural Patterns
+### Mock QueryBuilder Pattern
+```typescript
+const mockQueryBuilder = {
+  andWhere: jest.fn().mockReturnThis(),
+  orderBy: jest.fn().mockReturnThis(),
+  skip: jest.fn().mockReturnThis(),
+  take: jest.fn().mockReturnThis(),
+  getManyAndCount: jest.fn().mockResolvedValue([data, count]),
+} as any; // Utiliser 'as any' pour éviter erreurs TypeScript
 
-[2026-02-10 16:31:35] - **Monorepo Workspaces**: NPM workspaces with shared package
-[2026-02-10 16:31:35] - **Layered Architecture**:
-  - Frontend: Pages → Components → Hooks → API
-  - Backend: Controllers → Services → Repositories → Entities
-[2026-02-10 16:31:35] - **Dependency Injection**: NestJS DI container for backend services
-[2026-02-10 16:31:35] - **API Gateway Pattern**: Vite proxy routes /api/* to backend
-[2026-02-10 16:31:35] - **Repository Pattern**: TypeORM repositories for data access
+repository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+```
 
-## Testing Patterns
+### Tests Interceptors RxJS
+```typescript
+import { of } from 'rxjs';
 
-[2026-02-10 16:31:35] - **Test Organization**: Tests colocated with source files
-[2026-02-10 16:31:35] - **Mocking Strategy**:
-  - Frontend: Mock API calls with MSW or fetch mocks
-  - Backend: Mock repositories and external dependencies
-[2026-02-10 16:31:35] - **Coverage Enforcement**: 80% minimum threshold in CI/CD
-[2026-02-10 16:31:35] - **Test Types**:
-  - Unit tests for services and utilities
-  - Component tests for React components
-  - Integration tests for full modules
-[2026-02-10 16:31:35] - **AAA Pattern**: Arrange-Act-Assert structure in all tests
+it('should transform data', (done) => {
+  mockCallHandler.handle = jest.fn(() => of(testData));
+  
+  interceptor.intercept(context, mockCallHandler).subscribe((result: any) => {
+    expect(result).toEqual(expected);
+    done();
+  });
+});
+```
+
+### Tests Filters
+```typescript
+const mockResponse = {
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn().mockReturnThis(),
+};
+
+const mockRequest = { method: 'GET', url: '/api/test' };
+
+const mockArgumentsHost = {
+  switchToHttp: () => ({
+    getResponse: () => mockResponse,
+    getRequest: () => mockRequest,
+  }),
+} as any;
+```
+
+### Tests Helpers Statiques
+- Tester toutes transitions d'état possibles
+- Tester cas limites et invalides
+- Vérifier retours booléens et tableaux
+
+## Règles Tests Backend
+
+### Couverture Minimale
+- Statements: 80%
+- Branches: 60%
+- Modules métier critiques: 95%+
+
+### Bonnes Pratiques
+- Tous tests doivent passer avant commit
+- Utiliser `new Date()` pour entities, pas strings
+- Mocks TypeORM: `as any` pour QueryBuilder partiel
+- Structure AAA: Arrange, Act, Assert
+- Nommage clair: `should [action] when [condition]`

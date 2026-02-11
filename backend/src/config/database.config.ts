@@ -1,5 +1,4 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
 
 /**
  * TypeORM database configuration
@@ -8,10 +7,10 @@ import { User } from '../users/entities/user.entity';
  * ⚠️ WARNING: synchronize: true should be disabled in production
  * Use migrations for production deployments
  */
-export const databaseConfig: TypeOrmModuleOptions = {
+export const databaseConfig = (): TypeOrmModuleOptions => ({
   type: 'sqlite',
-  database: process.env.DB_DATABASE || 'data/dev.sqlite',
-  entities: [User],
-  synchronize: process.env.NODE_ENV !== 'production',
-  logging: process.env.NODE_ENV === 'development',
-};
+  database: process.env.DB_DATABASE || './data/expense-management.sqlite',
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  synchronize: process.env.DB_SYNCHRONIZE === 'true' || process.env.NODE_ENV !== 'production',
+  logging: process.env.DB_LOGGING === 'true' || process.env.NODE_ENV === 'development',
+});

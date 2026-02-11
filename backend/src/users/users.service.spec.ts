@@ -1,27 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRole } from '../common/enums';
+
+const createMockRepository = () => ({
+  create: jest.fn(),
+  save: jest.fn(),
+  findOne: jest.fn(),
+  find: jest.fn(),
+  remove: jest.fn(),
+  createQueryBuilder: jest.fn(),
+});
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repository: Repository<User>;
-
-  const mockRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-  };
-
-  const mockUser: User = {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    email: 'test@example.com',
-    name: 'Test User',
-    createdAt: new Date('2026-02-10T15:30:00.000Z'),
-  };
+  let repository: ReturnType<typeof createMockRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,17 +26,13 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: createMockRepository(),
         },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get<Repository<User>>(getRepositoryToken(User));
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    repository = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -47,77 +40,126 @@ describe('UsersService', () => {
   });
 
   describe('create', () => {
-    it('should create a user with valid data', async () => {
+    it('should create a new user', async () => {
       const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        name: 'Test User',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
       };
 
-      mockRepository.create.mockReturnValue(mockUser);
-      mockRepository.save.mockResolvedValue(mockUser);
+      const user = {
+        id: 'uuid-1',
+        ...createUserDto,
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      repository.findOne.mockResolvedValue(null);
+      repository.create.mockReturnValue(user);
+      repository.save.mockResolvedValue(user);
 
       const result = await service.create(createUserDto);
 
-      expect(result).toEqual({
-        id: mockUser.id,
-        email: mockUser.email,
-        name: mockUser.name,
-        createdAt: '2026-02-10T15:30:00.000Z',
-      });
-      expect(repository.create).toHaveBeenCalledWith(createUserDto);
-      expect(repository.save).toHaveBeenCalledWith(mockUser);
-    });
-  });
-
-  describe('findAll', () => {
-    it('should return all users', async () => {
-      const users = [mockUser];
-      mockRepository.find.mockResolvedValue(users);
-
-      const result = await service.findAll();
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({
-        id: mockUser.id,
-        email: mockUser.email,
-        name: mockUser.name,
-        createdAt: '2026-02-10T15:30:00.000Z',
-      });
-      expect(repository.find).toHaveBeenCalledWith({
-        order: { createdAt: 'DESC' },
-      });
+      expect(result.email).toBe(createUserDto.email);
+      expect(result.role).toBe(UserRole.EMPLOYEE);
+      expect(repository.save).toHaveBeenCalled();
     });
 
-    it('should return empty array when no users exist', async () => {
-      mockRepository.find.mockResolvedValue([]);
+    it('should throw ConflictException if email already exists', async () => {
+      const createUserDto: CreateUserDto = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'existing@example.com',
+      };
 
-      const result = await service.findAll();
+      repository.findOne.mockResolvedValue({ email: createUserDto.email });
 
-      expect(result).toEqual([]);
+      await expect(service.create(createUserDto)).rejects.toThrow(ConflictException);
     });
   });
 
   describe('findOne', () => {
-    it('should find user by id', async () => {
-      mockRepository.findOne.mockResolvedValue(mockUser);
+    it('should return a user by id', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-      const result = await service.findOne(mockUser.id);
+      repository.findOne.mockResolvedValue(user);
 
-      expect(result).toEqual({
-        id: mockUser.id,
-        email: mockUser.email,
-        name: mockUser.name,
-        createdAt: '2026-02-10T15:30:00.000Z',
-      });
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { id: mockUser.id } });
+      const result = await service.findOne('uuid-1');
+
+      expect(result.id).toBe('uuid-1');
     });
 
-    it('should return null for non-existent user', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw NotFoundException if user not found', async () => {
+      repository.findOne.mockResolvedValue(null);
 
-      const result = await service.findOne('non-existent-id');
+      await expect(service.findOne('non-existent')).rejects.toThrow(NotFoundException);
+    });
+  });
 
-      expect(result).toBeNull();
+  describe('update', () => {
+    it('should update a user', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const updateUserDto: UpdateUserDto = {
+        firstName: 'Jane',
+      };
+
+      repository.findOne.mockResolvedValue(user);
+      repository.save.mockResolvedValue({ ...user, ...updateUserDto });
+
+      const result = await service.update('uuid-1', updateUserDto);
+
+      expect(result.firstName).toBe('Jane');
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('non-existent', {})).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a user', async () => {
+      const user = {
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+      };
+
+      repository.findOne.mockResolvedValue(user);
+      repository.remove.mockResolvedValue(user);
+
+      await service.remove('uuid-1');
+
+      expect(repository.remove).toHaveBeenCalledWith(user);
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.remove('non-existent')).rejects.toThrow(NotFoundException);
     });
   });
 });

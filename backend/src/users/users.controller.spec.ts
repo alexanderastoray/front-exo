@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserRole } from '../common/enums';
 import { UserResponseDto } from './dto/user-response.dto';
 
 describe('UsersController', () => {
@@ -13,13 +14,8 @@ describe('UsersController', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
-  };
-
-  const mockUserResponse: UserResponseDto = {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    email: 'test@example.com',
-    name: 'Test User',
-    createdAt: '2026-02-10T15:30:00.000Z',
+    update: jest.fn(),
+    remove: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -37,10 +33,6 @@ describe('UsersController', () => {
     service = module.get<UsersService>(UsersService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
@@ -48,48 +40,116 @@ describe('UsersController', () => {
   describe('create', () => {
     it('should create a user', async () => {
       const createUserDto: CreateUserDto = {
-        email: 'test@example.com',
-        name: 'Test User',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
       };
 
-      mockUsersService.create.mockResolvedValue(mockUserResponse);
+      const expectedResult = new UserResponseDto({
+        id: 'uuid-1',
+        ...createUserDto,
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockUsersService.create.mockResolvedValue(expectedResult);
 
       const result = await controller.create(createUserDto);
 
-      expect(result).toEqual(mockUserResponse);
+      expect(result).toEqual(expectedResult);
       expect(service.create).toHaveBeenCalledWith(createUserDto);
     });
   });
 
   describe('findAll', () => {
-    it('should return all users', async () => {
-      const users = [mockUserResponse];
-      mockUsersService.findAll.mockResolvedValue(users);
+    it('should return paginated users', async () => {
+      const expectedResult = {
+        data: [
+          new UserResponseDto({
+            id: 'uuid-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+            role: UserRole.EMPLOYEE,
+            managerId: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+        ],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+        },
+      };
 
-      const result = await controller.findAll();
+      mockUsersService.findAll.mockResolvedValue(expectedResult);
 
-      expect(result).toEqual(users);
+      const result = await controller.findAll({ page: 1, limit: 10 });
+
+      expect(result).toEqual(expectedResult);
       expect(service.findAll).toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
     it('should return a user by id', async () => {
-      mockUsersService.findOne.mockResolvedValue(mockUserResponse);
+      const expectedResult = new UserResponseDto({
+        id: 'uuid-1',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
-      const result = await controller.findOne(mockUserResponse.id);
+      mockUsersService.findOne.mockResolvedValue(expectedResult);
 
-      expect(result).toEqual(mockUserResponse);
-      expect(service.findOne).toHaveBeenCalledWith(mockUserResponse.id);
+      const result = await controller.findOne('uuid-1');
+
+      expect(result).toEqual(expectedResult);
+      expect(service.findOne).toHaveBeenCalledWith('uuid-1');
     });
+  });
 
-    it('should throw NotFoundException when user not found', async () => {
-      mockUsersService.findOne.mockResolvedValue(null);
+  describe('update', () => {
+    it('should update a user', async () => {
+      const updateUserDto: UpdateUserDto = {
+        firstName: 'Jane',
+      };
 
-      await expect(controller.findOne('non-existent-id')).rejects.toThrow(NotFoundException);
-      await expect(controller.findOne('non-existent-id')).rejects.toThrow(
-        'User with ID non-existent-id not found'
-      );
+      const expectedResult = new UserResponseDto({
+        id: 'uuid-1',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        role: UserRole.EMPLOYEE,
+        managerId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockUsersService.update.mockResolvedValue(expectedResult);
+
+      const result = await controller.update('uuid-1', updateUserDto);
+
+      expect(result).toEqual(expectedResult);
+      expect(service.update).toHaveBeenCalledWith('uuid-1', updateUserDto);
+    });
+  });
+
+  describe('remove', () => {
+    it('should remove a user', async () => {
+      mockUsersService.remove.mockResolvedValue(undefined);
+
+      await controller.remove('uuid-1');
+
+      expect(service.remove).toHaveBeenCalledWith('uuid-1');
     });
   });
 });

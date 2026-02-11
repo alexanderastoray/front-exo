@@ -1,24 +1,26 @@
 # Active Context
 
-This file tracks the project's current status, including recent changes, current goals, and open questions.
+## Objectif Actuel
+Couverture tests backend: 69.19% (objectif 80%)
 
-## Current Focus
+## État du Code
+- ✅ Tests ExpenseReports (97.56%), Expenses (100%), Health (100%), Helpers (100%), Interceptors/Filters (100%)
+- ⚠️ Attachments non testé (0%, 117 lignes) - bloque objectif 80%
+- ✅ 136/136 tests passent, 13 suites
 
-- Architecture complète de l'API de gestion de notes de frais finalisée
-- Document d'architecture complet créé (ARCHITECTURE_GESTION_NOTES_FRAIS.md)
-- Prêt pour validation et passage en phase d'implémentation
+## Fichiers Actifs
+- `backend/src/expense-reports/*.spec.ts` (34 tests)
+- `backend/src/expenses/*.spec.ts` (23 tests)
+- `backend/src/common/**/*.spec.ts` (11 tests)
+- `backend/src/health/*.spec.ts` (2 tests)
+- `COVERAGE_REPORT_FINAL.md`
 
-## Recent Changes
+## Points d'Attention Immédiats
+- Module Attachments complexe (mocks fs/Multer requis)
+- Couverture branches faible (48.5%)
+- Users service incomplet (68.88%)
 
-[2026-02-10 16:28:40] - Memory Bank initialized
-[2026-02-10 16:28:40] - Project requirements received for full-stack monorepo
-[2026-02-10 16:28:40] - Architecture planning phase started
-[2026-02-11 09:02:00] - Architecture complète API Notes de Frais créée
-[2026-02-11 09:02:00] - Document ARCHITECTURE_GESTION_NOTES_FRAIS.md finalisé (10 sections)
-[2026-02-11 09:02:00] - Roadmap d'implémentation détaillée (8 phases, 12 jours)
-
-## Open Questions/Issues
-
-- Validation de l'architecture par l'utilisateur requise
-- Confirmation des choix par défaut (pagination, format dates, etc.)
-- Décision sur les 5 points à confirmer (section 9 du document)
+## Prochaines Étapes
+1. Tester Attachments service/controller (+12% → 81%)
+2. Améliorer Users service (+3.5% → 73%)
+3. Tests E2E workflows complets

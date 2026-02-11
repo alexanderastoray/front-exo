@@ -1,0 +1,10 @@
+/**
+ * Expense status enum
+ */
+export enum ExpenseStatus {
+  CREATED = 'CREATED',
+  SUBMITTED = 'SUBMITTED',
+  VALIDATED = 'VALIDATED',
+  REJECTED = 'REJECTED',
+  PAID = 'PAID',
+}
