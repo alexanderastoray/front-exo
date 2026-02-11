@@ -50,6 +50,7 @@ export class ExpenseReportsController {
     type: ErrorResponseDto,
   })
   create(@Body() createDto: CreateExpenseReportDto): Promise<ExpenseReportResponseDto> {
+    console.log('Received DTO:', JSON.stringify(createDto, null, 2));
     return this.expenseReportsService.create(createDto);
   }
 

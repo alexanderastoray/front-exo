@@ -9,9 +9,9 @@ export class CreateExpenseReportDto {
 
   @ApiProperty({ description: 'Report date', example: '2026-02-15' })
   @IsDateString()
-  reportDate: Date;
+  reportDate: string;
 
-  @ApiProperty({ description: 'User ID', example: 'uuid-123' })
+  @ApiProperty({ description: 'User ID', example: '00000000-0000-0000-0000-000000000001' })
   @IsUUID()
   userId: string;
 }

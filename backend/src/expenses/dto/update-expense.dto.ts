@@ -24,8 +24,8 @@ export class UpdateExpenseDto {
   @IsOptional()
   amount?: number;
 
-  @ApiPropertyOptional({ description: 'Expense date' })
+  @ApiPropertyOptional({ description: 'Expense date', example: '2026-02-15' })
   @IsDateString()
   @IsOptional()
-  expenseDate?: Date;
+  expenseDate?: string;
 }

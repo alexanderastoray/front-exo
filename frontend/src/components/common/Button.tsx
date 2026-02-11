@@ -8,7 +8,7 @@ import { ReactNode } from 'react';
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'cancel';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   disabled?: boolean;
@@ -29,7 +29,8 @@ export function Button({
   const variantClasses = {
     primary: 'bg-primary text-white hover:bg-primary/90',
     secondary: 'bg-gray-200 dark:bg-white/10 text-foreground-light dark:text-foreground-dark hover:bg-gray-300 dark:hover:bg-white/20',
-    ghost: 'bg-transparent hover:bg-gray-100 dark:hover:bg-white/10',
+    ghost: 'bg-primary/10 text-primary hover:bg-primary/20',
+    cancel: 'bg-gray-200 dark:bg-surface-dark text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-surface-dark/80',
   };
 
   const sizeClasses = {

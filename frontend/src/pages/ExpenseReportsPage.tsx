@@ -17,7 +17,13 @@ import { Footer } from '../components/layout/Footer';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ExpenseReport } from '../types/expense-report.types';
 
-export function ExpenseReportsPage() {
+interface ExpenseReportsPageProps {
+  onCreateReport?: () => void;
+  onViewReport?: (reportId: string) => void;
+  onNavigateToProfile?: () => void;
+}
+
+export function ExpenseReportsPage({ onCreateReport, onViewReport, onNavigateToProfile }: ExpenseReportsPageProps = {}) {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   // Fetch reports
@@ -38,13 +44,19 @@ export function ExpenseReportsPage() {
 
   // Handlers
   const handleCreateClick = () => {
-    console.log('Create new expense report');
-    // TODO: Navigate to create page
+    if (onCreateReport) {
+      onCreateReport();
+    } else {
+      console.log('Create new expense report');
+    }
   };
 
   const handleReportClick = (report: ExpenseReport) => {
-    console.log('View report:', report.id);
-    // TODO: Navigate to report detail page
+    if (onViewReport) {
+      onViewReport(report.id);
+    } else {
+      console.log('View report:', report.id);
+    }
   };
 
   const handleRemoveStatusFilter = () => {
@@ -85,21 +97,18 @@ export function ExpenseReportsPage() {
 
           {/* Filter Button */}
           <div className="flex items-center space-x-2">
-            <Button
+            <button
               onClick={() => setIsFilterModalOpen(true)}
-              variant="ghost"
-              size="md"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-primary/10 text-primary whitespace-nowrap"
             >
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-base">tune</span>
-                <span>Filter & Sort</span>
-                {activeFilterCount > 0 && (
-                  <span className="ml-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </div>
-            </Button>
+              <span className="material-symbols-outlined text-base">tune</span>
+              Filter & Sort
+              {activeFilterCount > 0 && (
+                <span className="ml-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Active Filters */}
@@ -131,7 +140,11 @@ export function ExpenseReportsPage() {
       </main>
 
       {/* Footer Navigation */}
-      <Footer activeTab="reports" />
+      <Footer
+        activeTab="reports"
+        onNavigateToSubmit={onCreateReport}
+        onNavigateToProfile={onNavigateToProfile}
+      />
 
       {/* Filter Modal */}
       <FilterModal

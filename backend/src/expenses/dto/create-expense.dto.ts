@@ -28,5 +28,5 @@ export class CreateExpenseDto {
 
   @ApiProperty({ description: 'Expense date', example: '2026-02-15' })
   @IsDateString()
-  expenseDate: Date;
+  expenseDate: string;
 }

@@ -5,14 +5,22 @@
 
 interface FooterProps {
   activeTab?: 'reports' | 'submit' | 'profile';
+  onNavigateToReports?: () => void;
+  onNavigateToSubmit?: () => void;
+  onNavigateToProfile?: () => void;
 }
 
-export function Footer({ activeTab = 'reports' }: FooterProps) {
+export function Footer({
+  activeTab = 'reports',
+  onNavigateToReports,
+  onNavigateToSubmit,
+  onNavigateToProfile,
+}: FooterProps) {
   return (
     <footer className="fixed bottom-0 left-0 right-0 bg-white dark:bg-background-dark/80 backdrop-blur-sm border-t border-black/5 dark:border-white/10">
       <nav className="flex justify-around items-center h-16">
-        <a
-          href="#reports"
+        <button
+          onClick={onNavigateToReports}
           className={`flex flex-col items-center gap-1 ${
             activeTab === 'reports'
               ? 'text-primary'
@@ -30,10 +38,10 @@ export function Footer({ activeTab = 'reports' }: FooterProps) {
             <path d="M5 21V3h14v18l-7-3-7 3z"></path>
           </svg>
           <span className="text-xs font-medium">Reports</span>
-        </a>
+        </button>
 
-        <a
-          href="#submit"
+        <button
+          onClick={onNavigateToSubmit}
           className={`flex flex-col items-center gap-1 ${
             activeTab === 'submit'
               ? 'text-primary'
@@ -56,10 +64,10 @@ export function Footer({ activeTab = 'reports' }: FooterProps) {
             <path d="M12 5v14"></path>
           </svg>
           <span className="text-xs font-medium">Submit</span>
-        </a>
+        </button>
 
-        <a
-          href="#profile"
+        <button
+          onClick={onNavigateToProfile}
           className={`flex flex-col items-center gap-1 ${
             activeTab === 'profile'
               ? 'text-primary'
@@ -82,7 +90,7 @@ export function Footer({ activeTab = 'reports' }: FooterProps) {
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
           <span className="text-xs font-medium">Profile</span>
-        </a>
+        </button>
       </nav>
     </footer>
   );
